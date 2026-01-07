@@ -5,60 +5,72 @@ using System.Text;
 
 public class Program
 {
-
-    public  static String OldPhonePad(string input)
+    public static string OldPhonePad(string input)
     {
         Dictionary<char, string> keypad = new Dictionary<char, string>()
-    {
-        { '2', "ABC" }, { '3', "DEF" }, { '4', "GHI" },
-        { '5', "JKL" }, { '6', "MNO" }, { '7', "PQRS" },
-        { '8', "TUV" }, { '9', "WXYZ" }
-    };
+        {
+            { '2', "ABC" },
+            { '3', "DEF" },
+            { '4', "GHI" },
+            { '5', "JKL" },
+            { '6', "MNO" },
+            { '7', "PQRS" },
+            { '8', "TUV" },
+            { '9', "WXYZ" }
+        };
 
         StringBuilder result = new StringBuilder();
-        string[] numbercombo = input.Split(' ');
 
-        foreach (string number in numbercombo)
+        char lastKey = '\0';
+        int pressCount = 0;
+
+        void CommitCharacter()
         {
-            char? prevChar = null;
-            int count = 0;
-
-            foreach (char c in number)
+            if (lastKey != '\0' && keypad.ContainsKey(lastKey))
             {
-                if (prevChar == null)
+                string letters = keypad[lastKey];
+                int index = (pressCount - 1) % letters.Length;
+                result.Append(letters[index]);
+            }
+            lastKey = '\0';
+            pressCount = 0;
+        }
+
+        foreach (char c in input)
+        {
+            if (c == '#')
+            {
+                CommitCharacter();
+                break;
+            }
+            else if (c == '*')
+            {
+                CommitCharacter();
+                if (result.Length > 0)
+                    result.Remove(result.Length - 1, 1);
+            }
+            else if (c == ' ')
+            {
+                CommitCharacter();
+            }
+            else if (char.IsDigit(c))
+            {
+                if (c == lastKey)
                 {
-                    prevChar = c;
-                    count = 1;
-                }
-                else if (c == prevChar)
-                {
-                    count++;
+                    pressCount++;
                 }
                 else
                 {
-                    if (keypad.ContainsKey((char)prevChar))
-                    {
-                        string letters = keypad[(char)prevChar];
-                        int index = (count - 1) % letters.Length;
-                        result.Append(letters[index]);
-                    }
-
-                    prevChar = c;
-                    count = 1;
+                    CommitCharacter();
+                    lastKey = c;
+                    pressCount = 1;
                 }
-            }
-
-            
-            if (prevChar != null && keypad.ContainsKey((char)prevChar))
-            {
-                string letters = keypad[(char)prevChar];
-                int index = (count - 1) % letters.Length;
-                result.Append(letters[index]);
             }
         }
 
         return result.ToString();
     }
+
 
 
 
